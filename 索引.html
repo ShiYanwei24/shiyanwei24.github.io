@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/tycss.css">
+</head>
+<body>
+<script>
+    var _map;
+    var _box;
+    var _btn;
+    var _stu;
+    var is_click=true;
+    var on_click=true;
+    var theTimer;
+    var _del;
+    function map() {
+        this.width=1000;
+        this.height=700;
+        this.margin="50px auto";
+        this.border="1px solid #000";
+        this.r_position="relative";
+        this.div=null;
+        this.createDiv=function () {
+            if(this.div==null){
+                this.div=document.createElement("div");
+                this.div.style.width=this.width+2+"px";
+                this.div.style.height=this.height+2+"px";
+                this.div.style.margin=this.margin;
+                this.div.style.border=this.border;
+                this.div.style.position=this.r_position;
+                document.getElementsByTagName("body")[0].appendChild(this.div)
+            }
+        }
+    }
+    function box() {
+        this.num=0;
+        this.user=[];
+        this.col=7;
+        this.row=6;
+        this.width=_map.width/this.col;
+        this.height=_map.height/this.row;
+        this.border="1px solid #000";
+        this.a_position="absolute";
+        this.fontSize="20px";
+        this.textAlign="center";
+        this.div=[];
+        this.matrix=function () {
+            for(var i=0;i<this.col*this.row;i++){
+                var _x=i%this.col*this.width;
+                var _y=Math.floor(i/this.col)*this.height;
+                this.div.push([
+                    null,
+                    _x,
+                    _y,
+                    "white",
+                    "black",
+                    "scale(1)",
+                    "none",
+                    is_click==false?1:0
+                ]);
+            }
+        };
+        this.createDiv=function () {
+            is_click=true;
+            for(var j=0;j<this.div.length;j++){
+                if(this.div[j][0]==null){
+                    this.div[j][0]=document.createElement("div");
+                    this.div[j][0].style.width=this.width+"px";
+                    this.div[j][0].style.height=this.height+"px";
+                    this.div[j][0].style.position=this.a_position;
+                    this.div[j][0].style.border=this.border;
+                    this.div[j][0].style.fontSize=this.fontSize;
+                    this.div[j][0].style.textAlign=this.textAlign;
+                    this.div[j][0].style.lineHeight=this.height+"px";
+                    _map.div.appendChild(this.div[j][0])
+                }
+                this.div[j][0].innerHTML=this.user[j];
+                this.div[j][0].style.display=(this.user[j]==undefined)?"none":"block";
+                this.div[j][0].style.left = this.div[j][1] + "px";
+                this.div[j][0].style.top = this.div[j][2] + "px";
+                this.div[j][0].style.transform = this.div[j][5];
+                this.div[j][0].style.transition = this.div[j][6];
+                this.div[j][0].style.opacity = this.div[j][7];
+                this.div[j][0].style.backgroundColor = this.div[j][3];
+                this.div[j][0].style.color = this.div[j][4];
+            }
+        };
+        this.move=function () {
+            this.num=Math.floor(Math.random()*this.user.length);
+            for(var k=0;k<this.div.length;k++){
+                this.div[k][3]="white";
+                this.div[k][4]="black";
+            }
+            this.div[this.num][3]="black";
+            this.div[this.num][4]="white";
+            this.createDiv();
+            theTimer=setTimeout("_box.move()",20)
+        }
+    }
+    function btn() {
+        this.width=150;
+        this.height=60;
+        this.playText="开始";
+        this.pauseText="停止";
+        this.startText="列阵";
+        this.a_position="absolute";
+        this.margin="auto";
+        this.btn=null;
+        this.createDiv=function () {
+            if(this.btn==null){
+                this.btn=document.createElement("input");
+                this.btn.type="button";
+                this.btn.value=this.startText;
+                this.btn.style.width=this.width+"px";
+                this.btn.style.height=this.height+"px";
+                this.btn.style.position=this.a_position;
+                this.btn.style.left=0;
+                this.btn.style.right=0;
+                this.btn.style.margin=this.margin;
+                this.btn.style.bottom=-this.height-20+"px";
+                _map.div.appendChild(this.btn)
+            }
+            this.btn.onclick=function () {
+                if(_btn.btn.value==_btn.startText){
+                    _btn.btn.value=_btn.playText;
+                    for(var x=0;x<_stu.div.length;x++){
+                        _stu.div[x][4]=0;
+                       /* _stu.div[x][0].style.display="none";*/
+                        _box.div[x][7]=1;
+                        if(_stu.div[x][0].value.length!=0){
+                            _box.user.push(_stu.div[x][0].value)
+                        }
+                    }
+                }
+                else {
+                    if(_btn.btn.value==_btn.playText){
+                        _btn.btn.value=_btn.pauseText;
+                        clearTimeout(theTimer);
+                        _box.move();
+                        for(var o=0;o<_box.div.length;o++){
+                            _box.div[o][6]="none";
+                            _box.div[o][5]="scale(1)";
+                            _box.div[o][7]=1;
+                            _box.div[o][1]=o%_box.col*_box.width;
+                            _box.div[o][2]=Math.floor(o/_box.col)*_box.height;
+                        }
+                    }
+                    else {
+                        _btn.btn.value=_btn.playText;
+                        clearTimeout(theTimer);
+                        for(var n=0;n<_box.div.length;n++){
+                            _box.div[n][6]="all .6s linear";
+                            _box.div[n][5]="scale(1)";
+                            _box.div[n][7]=0;
+                            _box.div[n][1]=n%_box.col*_box.width;
+                            _box.div[n][2]=Math.floor(n/_box.col)*_box.height;
+                        }
+                        _box.div[_box.num][6]="all .6s linear";
+                        _box.div[_box.num][5]="scale(3.4)";
+                        _box.div[_box.num][7]=1;
+                        _box.div[_box.num][1]=_map.width/2-_box.width/2;
+                        _box.div[_box.num][2]=_map.height/2-_box.height/2;
+                        _del.matrix();
+                        _del.createDiv();
+                        _del.click();
+                    }
+                }
+                _stu.createDiv();
+                _box.createDiv();
+            };
+        }
+    }
+    function stu() {
+        this.width=200;
+        this.height=40;
+        this.paddingLeft=15;
+        this.transition="all .3s linear";
+        this.position="absolute";
+        this.div=[];
+        this.matrix=function () {
+            for(var i=0;i<_box.col*_box.row;i++){
+                this.div.push([
+                        null,
+                        80,
+                        20,
+                        "text",
+                        1,
+                        2
+                ])
+            }
+        };
+        this.createDiv=function () {
+            for(var j=0;j<this.div.length;j++){
+                var _x=Math.floor(j%3)*this.width;
+                var _y=Math.floor(j/3)*this.height;
+                if(this.div[j][0]==null){
+                    this.div[j][0]=document.createElement("input");
+                    this.div[j][0].type=this.div[j][3];
+                    this.div[j][0].style.width=this.width+"px";
+                    this.div[j][0].style.height=this.height+"px";
+                    this.div[j][0].style.left=((_x+this.div[j][1])+_x*.6)+"px";
+                    this.div[j][0].style.top=((_y+this.div[j][2])+_y*.19)+"px";
+                    this.div[j][0].style.paddingLeft=this.paddingLeft+"px";
+                    this.div[j][0].style.transition=this.transition;
+                    this.div[j][0].style.position=this.position;
+                    this.div[j][0].style.zIndex=this.div[j][5];
+                    _map.div.appendChild(this.div[j][0]);
+                }
+                this.div[j][0].style.opacity=this.div[j][4];
+            }
+        }
+    }
+    function del() {
+        this.width="100%";
+        this.height="100%";
+        this.bgColor="rgba(0,0,0,.1)";
+        this.marginB="10px";
+        this.positionF="fixed";
+        this.positionR="relative";
+        this.positionA="absolute";
+        this.padding="20px";
+        this.textAlign="center";
+        this.cursorPointer="pointer";
+        this.ul=null;
+        this.li=[];
+        this.matrix=function () {
+            for(var m=0;m<_box.user.length;m++){
+                this.li.push([
+                    100,
+                    30,
+                    "#09f",
+                    "#fff",
+                    null,
+                    _box.user[m],
+                    null,
+                    1
+                ]);
+            }
+        };
+        this.createDiv=function () {
+            if(this.ul==null){
+                this.ul=document.createElement("ul");
+                this.ul.style.position=this.positionF;
+                this.ul.style.width=this.width;
+                this.ul.style.height=this.height;
+                this.ul.style.padding=this.padding;
+                this.ul.style.backgroundColor=this.bgColor;
+                this.ul.style.zIndex = 9;
+                this.ul.style.top=0;
+                this.ul.style.left=0;
+                document.getElementsByTagName("body")[0].appendChild(this.ul);
+            }
+            for(var p=0;p<this.li.length;p++){
+                if(this.li[p][4]==null){
+                    this.li[p][4]=document.createElement("li");
+                    this.li[p][4].style.width=this.li[p][0]+"px";
+                    this.li[p][4].style.height=this.li[p][1]+"px";
+                    this.li[p][4].style.marginBottom=this.marginB;
+                    this.li[p][4].style.textAlign=this.textAlign;
+                    this.li[p][4].style.position=this.positionR;
+                    this.li[p][4].style.lineHeight=this.li[p][1]+"px";
+                    this.li[p][4].style.color=this.li[p][3];
+                    this.li[p][4].style.cursor=this.cursorPointer;
+                    this.li[p][4].innerHTML=this.li[p][5];
+                    _del.ul.appendChild(this.li[p][4]);
+                }
+                this.li[p][4].style.backgroundColor=this.li[p][2];
+            }
+        };
+        this.click=function () {
+            for(var _p=0;_p<_del.li.length;_p++){
+                if(_p==_box.num){
+                    if(on_click){
+                        _del.li[_p][2]="#000";
+                        _del.li[_p][6] = document.createElement("input");
+                        _del.li[_p][6].type = "button";
+                        _del.li[_p][6].value = "delete";
+                        _del.li[_p][6].style.width = _del.li[_p][0] + "px";
+                        _del.li[_p][6].style.height = _del.li[_p][1] + "px";
+                        _del.li[_p][6].style.position = _del.positionA;
+                        _del.li[_p][6].style.right = -(_del.li[_p][0] + 10) + "px";
+                        _del.li[_p][4].appendChild(_del.li[_p][6]);
+                        on_click=false;
+                        _del.createDiv();
+                        _del.delClick();
+                    }
+                }
+                _del.li[_p][4].index=_p;
+                _del.li[_p][4].onclick=function () {
+                    /*console.log(this.index)*/
+                    for (var $p = 0; $p < _del.li.length; $p++) {
+                        _del.li[$p][2] = "#09f";
+                        if(_del.li[$p][6] != null){
+                            _del.li[$p][6].style.display = "none";
+                            _del.li[$p][6] = null;
+                        }
+                    }
+                    if(is_click){
+                        _del.li[this.index][2] = "#000";
+                        if(_del.li[this.index][6]==null) {
+                            _del.li[this.index][6] = document.createElement("input");
+                            _del.li[this.index][6].type = "button";
+                            _del.li[this.index][6].value = "delete";
+                            _del.li[this.index][6].style.width = _del.li[this.index][0] + "px";
+                            _del.li[this.index][6].style.height = _del.li[this.index][1] + "px";
+                            _del.li[this.index][6].style.position = _del.positionA;
+                            _del.li[this.index][6].style.right = -(_del.li[this.index][0] + 10) + "px";
+                            _del.li[this.index][4].appendChild(_del.li[this.index][6])
+                        }
+                    }
+                    _del.click();
+                    _del.createDiv();
+                    _del.delClick();
+                };
+            }
+        };
+        this.delClick=function () {
+            for(var d=0;d<_del.li.length;d++){
+                if(_del.li[d][6]!=null){
+                    this_d=d;
+                    _del.li[d][6].onclick=function () {
+                        this.parentNode.style.display="none";
+                        _box.user.splice(this_d,1);
+                        _box.div[_box.num][0].style.display="none";
+                        _del.ul.style.display="none";
+                        _del.ul=null;
+                        _del.li=[];
+                        _box.div=[];
+                        is_click=false;
+                        on_click=true;
+                        if(_box.user.length==0){
+                            _map.div.style.textAlign="center";
+                            _map.div.style.fontSize="60px";
+                            _map.div.style.fontWeight="bold";
+                            _map.div.style.color="#666";
+                            _map.div.style.lineHeight=_map.height+"px";
+                            _map.div.innerHTML="扎心了，没有学生了！"
+                        }
+                        _box.matrix();
+                        _box.createDiv();
+                    };
+                }
+            }
+        }
+    }
+    window.onload=function () {
+        _map=new map();
+        _map.createDiv();
+        _box=new box();
+        _box.matrix();
+        _box.createDiv();
+        _btn=new btn();
+        _btn.createDiv();
+        _stu=new stu();
+        _stu.matrix();
+        _stu.createDiv();
+        _del=new del();
+    }
+</script>
+</body>
+</html>
